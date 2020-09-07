@@ -111,17 +111,6 @@ $ [ワンライナー] | diff - ./aho
 
 ---
 
-# A1
-
-```sh
-# perl -pe 's/.*3.*/aho/' でもよい
-$ seq 40 | sed 's/.*3.*/aho/' | awk '{if($1%3){print $1}else{print "aho"}}'
-$ yes aho | nl -nln | head -n40 | awk '/3/||$1%3==0{$1=""}4' | tr -d ' ' | cut -f1
-$ seq 40 | sed '3~3s/.*/aho/;s/.*3.*/aho/'
-```
-
----
-
 # Q2 Date Sequence
 ## 2019年1月1日から2019年12月31日までの日付を `YYYY-mm-dd` で列挙してください
 
@@ -129,19 +118,6 @@ $ seq 40 | sed '3~3s/.*/aho/;s/.*3.*/aho/'
 
 # Q2 ヒント
 日付として正しい文字列をいきなり列挙するのは難しそう･･･でも`0101`とか`1231`とかはただの数字･･･これの列挙はできそう･･･？
-
----
-
-# A2
-
-```sh
-$ seq -w 0101 1231 | grep -vP "[4-9].$" | grep -vP "3[2-9]$" | grep -vP "00$" | grep -vP "(0[2469]|11)31" | grep -vP "02(29|30)" | sed 's/^../2019-&-/'
-$ seq 0 364 | awk '{print "date -d \"2019-01-01 "$1" days\" \"+%F\""}' | bash
-$ seq 0 364 | xargs -I@ date -d '2019-01-01 @ days' "+%F" 
-$ dateutils.dseq 2019-01-01 2019-12-31
-```
-
-[dateutils](https://github.com/hroptatyr/dateutils)
 
 ---
 
@@ -169,14 +145,6 @@ $ [ワンライナー] | diff - ./twins
 
 ---
 
-# A3
-
-```zsh
-$ seq inf | factor | awk 'NF==2{print $2}' | awk '{print x, $1; x=$1}' | awk '{if($2-$1==2)print $0}' | head -n100
-$ seq inf | xargs -n1 openssl prime | grep "is prime" |awk '{print $2}' | tr -d '()' | awk '{print x,x=$1}' | awk '$2-$1==2' | head -n100
-```
-
----
 # Q4 Expr Stream
 ## `1,2,3,4`、それぞれの数字の間に`+,-,/,*`のどれかを入れて、計算式を列挙してください。またその結果が負な組み合わせだけ出力してください。
 
@@ -219,15 +187,6 @@ $ [ワンライナー] | sort | diff - ./expr
 
 ---
 
-# A4
-
-```
-$ echo 1{+,-,/,\*}2{+,-,/,\*}3{+,-,/,\*}4 | fmt -1 | xargs -I@ echo "echo '@' \$((@))" | bash | awk '$2<0{print $1}' | sort
-$ echo 1 2 3 4 | sed -E 's@([^ ]) (.*)@\1+\2\n\1-\2\n\1*\2\n\1/\2@' | sed -E 's@([^ ]*) (.*)@\1+\2\n\1-\2\n\1*\2\n\1/\2@' | sed -E 's@([^ ]*) (.*)@\1+\2\n\1-\2\n\1*\2\n\1/\2@' > f && cat f | paste - <(cat f | bc) | perl -ale 'print if $F[1] < 0' | sort
-$ echo 1{+,-,/,\*}2{+,-,/,\*}3{+,-,/,\*}4 | fmt -1 | awk '{print $0,$0}' | teip -f2 bc | awk '$2<0{print $1}' | sort
-```
-
----
 
 # Q5 暗号解読
 ## angoファイルには暗号文が書かれています、それを解きたいです
@@ -255,14 +214,3 @@ EX) 数値列をASCII文字列に変換する君
 $ [改行区切りの数値列] | xargs | awk '{for(i=1;i<=NF;i++){if($i>256)exit(1); printf("%c", $i)}}'
 ```
 
----
-
-# A5
-
-```zsh
-# 小問1
-$ cat ./ango | xargs -n1 | awk '{x=1;for(i=0;i<200;i++){x*=$1;x%=5893};print x}'
-
-# 小問2
-$ cat twins | while read P Q; do cat ango |xargs -n1 | awk -v p=$P -v q=$Q '{x=1;for(i=0;i<173;i++){x*=$1;x%=p*q}print x}'|xargs|awk '{for(i=1;i<=NF;i++){if($i>256)exit(1);printf("%c",$i)};print ""}'; done
-```
